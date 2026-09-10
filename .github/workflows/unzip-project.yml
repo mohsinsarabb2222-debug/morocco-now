@@ -1,0 +1,31 @@
+name: Extract Morocco Now ZIP
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract project
+        run: |
+          mkdir -p .unpacked
+          unzip -q Morocco-Now-next.zip -d .unpacked
+          cp -a .unpacked/. .
+          rm -rf .unpacked
+          rm -f Morocco-Now-next.zip
+
+      - name: Commit project files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Extract Morocco Now project" || echo "Nothing to commit"
+          git push
