@@ -1,0 +1,1 @@
+- [Clerk React theme API](clerk-react-theme-api.md) — use the installed package's `appearance.theme` shape, not older `baseTheme` examples.

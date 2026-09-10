@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Morocco Now"
+description = "A multilingual Morocco discovery platform connecting visitors with destinations, local businesses, products, services, activities, and trusted travel guidance."
+version = "1.0.0"
+id = "artifacts/morocco-now"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21286
+
+[services.development]
+run = "pnpm --filter @workspace/morocco-now run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/morocco-now", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/morocco-now/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21286"
+BASE_PATH = "/"

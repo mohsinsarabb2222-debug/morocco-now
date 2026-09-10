@@ -1,0 +1,624 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Morocco Now public discovery and account API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+  - name: discovery
+  - name: businesses
+  - name: account
+  - name: commerce
+  - name: ai
+  - name: support
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /home:
+    get:
+      operationId: getHome
+      tags: [discovery]
+      summary: Load curated homepage data
+      responses:
+        "200":
+          description: Homepage data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HomeData"
+  /businesses:
+    get:
+      operationId: listBusinesses
+      tags: [businesses]
+      summary: Search and filter businesses
+      parameters:
+        - $ref: "#/components/parameters/Search"
+        - $ref: "#/components/parameters/Category"
+        - $ref: "#/components/parameters/City"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Businesses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Business"
+  /businesses/{slug}:
+    get:
+      operationId: getBusiness
+      tags: [businesses]
+      summary: Get a public business profile
+      parameters:
+        - $ref: "#/components/parameters/Slug"
+      responses:
+        "200":
+          description: Business profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BusinessDetail"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /businesses/{slug}/reviews:
+    get:
+      operationId: listBusinessReviews
+      tags: [businesses]
+      summary: List public reviews for a business
+      parameters:
+        - $ref: "#/components/parameters/Slug"
+      responses:
+        "200":
+          description: Reviews
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Review"
+  /categories:
+    get:
+      operationId: listCategories
+      tags: [discovery]
+      summary: List business categories
+      responses:
+        "200":
+          description: Categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+  /cities:
+    get:
+      operationId: listCities
+      tags: [discovery]
+      summary: List Moroccan cities
+      responses:
+        "200":
+          description: Cities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/City"
+  /destinations:
+    get:
+      operationId: listDestinations
+      tags: [discovery]
+      summary: List destinations
+      responses:
+        "200":
+          description: Destinations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Destination"
+  /map/markers:
+    get:
+      operationId: listMapMarkers
+      tags: [discovery]
+      summary: List map markers from published business coordinates
+      parameters:
+        - $ref: "#/components/parameters/Category"
+        - $ref: "#/components/parameters/City"
+      responses:
+        "200":
+          description: Map markers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MapMarker"
+  /search:
+    get:
+      operationId: searchAll
+      tags: [discovery]
+      summary: Search across businesses and destinations
+      parameters:
+        - $ref: "#/components/parameters/SearchRequired"
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchResults"
+  /account/profile:
+    get:
+      operationId: getProfile
+      tags: [account]
+      summary: Load the signed-in profile
+      security:
+        - clerk: []
+      responses:
+        "200":
+          description: Profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /account/favorites:
+    get:
+      operationId: listFavorites
+      tags: [account]
+      summary: List signed-in favorites
+      security:
+        - clerk: []
+      responses:
+        "200":
+          description: Favorites
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Business"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /account/favorites/{businessId}:
+    post:
+      operationId: addFavorite
+      tags: [account]
+      summary: Save a business
+      security:
+        - clerk: []
+      parameters:
+        - $ref: "#/components/parameters/BusinessId"
+      responses:
+        "201":
+          description: Favorite
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Favorite"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    delete:
+      operationId: removeFavorite
+      tags: [account]
+      summary: Remove a saved business
+      security:
+        - clerk: []
+      parameters:
+        - $ref: "#/components/parameters/BusinessId"
+      responses:
+        "204":
+          description: Removed
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /reviews:
+    post:
+      operationId: createReview
+      tags: [businesses]
+      summary: Publish a genuine review
+      security:
+        - clerk: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewInput"
+      responses:
+        "201":
+          description: Review
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /plans:
+    get:
+      operationId: listPlans
+      tags: [commerce]
+      summary: List business and tourist plans
+      responses:
+        "200":
+          description: Subscription plans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Plan"
+  /subscriptions:
+    post:
+      operationId: createSubscription
+      tags: [commerce]
+      summary: Start a subscription payment flow
+      security:
+        - clerk: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubscriptionInput"
+      responses:
+        "201":
+          description: Pending subscription
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /ai/chat:
+    post:
+      operationId: askMoroccoAi
+      tags: [ai]
+      summary: Ask Morocco AI using verified platform context
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiQuestion"
+      responses:
+        "200":
+          description: AI answer or configuration status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiAnswer"
+  /contact:
+    post:
+      operationId: submitContact
+      tags: [support]
+      summary: Send a support message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactInput"
+      responses:
+        "201":
+          description: Contact message accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactMessage"
+components:
+  securitySchemes:
+    clerk:
+      type: http
+      scheme: bearer
+  parameters:
+    Search:
+      name: search
+      in: query
+      required: false
+      schema:
+        type: string
+    SearchRequired:
+      name: q
+      in: query
+      required: true
+      schema:
+        type: string
+        minLength: 1
+    Category:
+      name: category
+      in: query
+      required: false
+      schema:
+        type: string
+    City:
+      name: city
+      in: query
+      required: false
+      schema:
+        type: string
+    Limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 12
+    Slug:
+      name: slug
+      in: path
+      required: true
+      schema:
+        type: string
+    BusinessId:
+      name: businessId
+      in: path
+      required: true
+      schema:
+        type: integer
+  responses:
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status: { type: string }
+      required: [status]
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+      required: [error]
+    Category:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        slug: { type: string }
+        icon: { type: string }
+      required: [id, name, slug]
+    City:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        slug: { type: string }
+        region: { type: string }
+        imageUrl: { type: ["string", "null"] }
+      required: [id, name, slug, region]
+    Destination:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        slug: { type: string }
+        city: { type: string }
+        description: { type: string }
+        imageUrl: { type: ["string", "null"] }
+        kind: { type: string }
+      required: [id, name, slug, city, description, kind]
+    Business:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        slug: { type: string }
+        category: { type: string }
+        city: { type: string }
+        shortDescription: { type: string }
+        imageUrl: { type: ["string", "null"] }
+        rating: { type: number }
+        reviewCount: { type: integer }
+        isOpen: { type: boolean }
+        priceLevel: { type: string }
+        latitude: { type: ["number", "null"] }
+        longitude: { type: ["number", "null"] }
+      required: [id, name, slug, category, city, shortDescription, rating, reviewCount, isOpen, priceLevel]
+    Product:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        description: { type: string }
+        priceCents: { type: integer }
+        currency: { type: string }
+        imageUrl: { type: ["string", "null"] }
+        status: { type: string }
+      required: [id, name, description, priceCents, currency, status]
+    Service:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        description: { type: string }
+        priceCents: { type: integer }
+        currency: { type: string }
+        durationMinutes: { type: ["integer", "null"] }
+        imageUrl: { type: ["string", "null"] }
+        status: { type: string }
+      required: [id, name, description, priceCents, currency, status]
+    BusinessDetail:
+      allOf:
+        - $ref: "#/components/schemas/Business"
+        - type: object
+          properties:
+            description: { type: string }
+            address: { type: string }
+            phone: { type: ["string", "null"] }
+            whatsapp: { type: ["string", "null"] }
+            website: { type: ["string", "null"] }
+            openingHours: { type: object, additionalProperties: { type: string } }
+            products:
+              type: array
+              items: { $ref: "#/components/schemas/Product" }
+            services:
+              type: array
+              items: { $ref: "#/components/schemas/Service" }
+            featured: { type: boolean }
+          required: [description, address, openingHours, products, services, featured]
+    Review:
+      type: object
+      properties:
+        id: { type: integer }
+        businessId: { type: integer }
+        userName: { type: string }
+        rating: { type: integer, minimum: 1, maximum: 5 }
+        title: { type: string }
+        comment: { type: string }
+        createdAt: { type: string }
+      required: [id, businessId, userName, rating, title, comment, createdAt]
+    ReviewInput:
+      type: object
+      properties:
+        businessId: { type: integer }
+        rating: { type: integer, minimum: 1, maximum: 5 }
+        title: { type: string, minLength: 2 }
+        comment: { type: string, minLength: 10 }
+      required: [businessId, rating, title, comment]
+    MapMarker:
+      type: object
+      properties:
+        id: { type: integer }
+        slug: { type: string }
+        name: { type: string }
+        category: { type: string }
+        city: { type: string }
+        latitude: { type: number }
+        longitude: { type: number }
+      required: [id, slug, name, category, city, latitude, longitude]
+    SearchResults:
+      type: object
+      properties:
+        businesses:
+          type: array
+          items: { $ref: "#/components/schemas/Business" }
+        destinations:
+          type: array
+          items: { $ref: "#/components/schemas/Destination" }
+      required: [businesses, destinations]
+    HomeData:
+      type: object
+      properties:
+        heroTitle: { type: string }
+        heroSubtitle: { type: string }
+        categories:
+          type: array
+          items: { $ref: "#/components/schemas/Category" }
+        destinations:
+          type: array
+          items: { $ref: "#/components/schemas/Destination" }
+        featuredBusinesses:
+          type: array
+          items: { $ref: "#/components/schemas/Business" }
+        popularBusinesses:
+          type: array
+          items: { $ref: "#/components/schemas/Business" }
+        experiences:
+          type: array
+          items: { $ref: "#/components/schemas/Destination" }
+      required: [heroTitle, heroSubtitle, categories, destinations, featuredBusinesses, popularBusinesses, experiences]
+    Profile:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        email: { type: string }
+        role: { type: string }
+        country: { type: ["string", "null"] }
+        preferredLanguage: { type: string }
+        favoriteCount: { type: integer }
+        reviewCount: { type: integer }
+      required: [id, name, email, role, preferredLanguage, favoriteCount, reviewCount]
+    Favorite:
+      type: object
+      properties:
+        businessId: { type: integer }
+        createdAt: { type: string }
+      required: [businessId, createdAt]
+    Plan:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        audience: { type: string }
+        priceCents: { type: integer }
+        currency: { type: string }
+        description: { type: string }
+        features:
+          type: array
+          items: { type: string }
+      required: [id, name, audience, priceCents, currency, description, features]
+    SubscriptionInput:
+      type: object
+      properties:
+        planId: { type: integer }
+      required: [planId]
+    Subscription:
+      type: object
+      properties:
+        id: { type: integer }
+        planId: { type: integer }
+        status: { type: string }
+        paymentStatus: { type: string }
+        providerConfigured: { type: boolean }
+      required: [id, planId, status, paymentStatus, providerConfigured]
+    AiQuestion:
+      type: object
+      properties:
+        question: { type: string, minLength: 2 }
+        language: { type: string }
+      required: [question]
+    AiAnswer:
+      type: object
+      properties:
+        answer: { type: string }
+        configured: { type: boolean }
+        sources:
+          type: array
+          items: { type: string }
+      required: [answer, configured, sources]
+    ContactInput:
+      type: object
+      properties:
+        name: { type: string, minLength: 2 }
+        email: { type: string, format: email }
+        subject: { type: string, minLength: 2 }
+        message: { type: string, minLength: 10 }
+      required: [name, email, subject, message]
+    ContactMessage:
+      type: object
+      properties:
+        id: { type: integer }
+        status: { type: string }
+        createdAt: { type: string }
+      required: [id, status, createdAt]

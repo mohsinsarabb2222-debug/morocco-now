@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Morocco Now">
+  <rect width="64" height="64" rx="16" fill="#bd4b2f"/>
+  <path d="M20 43V24h8.5c5.3 0 8.5 2.7 8.5 7 0 2.3-1.1 4.2-3 5.4L39 43h-6l-4.2-5.9H26V43h-6Zm6-10.5h2.2c2.1 0 3.2-.8 3.2-2.4s-1.1-2.4-3.2-2.4H26v4.8Z" fill="#fffaf1"/>
+  <circle cx="43.5" cy="43" r="3.5" fill="#e7b45b"/>
+</svg>
